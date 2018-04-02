@@ -13,11 +13,13 @@ namespace Talk2me.Dialogs
     [Serializable]
     public class RootDialog : IDialog<object>
     {
-        public Task StartAsync(IDialogContext context)
+
+
+        public async Task StartAsync(IDialogContext context)
         {
             context.Wait(this.MessageReceivedAsync);
 
-            return Task.CompletedTask;
+         //   return Task.CompletedTask;
         }
 
         private async Task MessageReceivedAsync(IDialogContext context, IAwaitable<IMessageActivity> result)
@@ -25,37 +27,47 @@ namespace Talk2me.Dialogs
             var message = await result;
             var regex = new Regex(@"\b(hello|hi|hey|how are you)\b");
 
-            // calculate something for us to return
 
             if (regex.IsMatch(message.Text))
             {
 
-                await context.PostAsync($"Hello!Welcome to the talk2me ");
+                await context.PostAsync($"Hello!Welcome to the talk2me.Do you want any suggestions in music and food ");
             }
 
-            else if (message.Text.ToLower().Contains("Do you know any songs") || message.Text.ToLower().Contains("music"))
+            else if (message.Text.ToLower().Contains("songs") || message.Text.ToLower().Contains("music"))
             {
-
-                await context.PostAsync(" I dont , however you should **try this** out at [Bing](https://www.bing.com/search?q=best%20+" + HttpUtility.UrlEncode("music"));
+                await context.PostAsync($"what type of music do you want to hear");
+                context.Call(new musicForm(), this.ResumeAfterOptionDialog);
+                
             }
+            else if (message.Text.ToLower().Contains("FoodPlaces") || message.Text.ToLower().Contains("Food") || message.Text.ToLower().Contains("restaurants"))
+            {
+                await context.PostAsync($"what type of food do you want to eat");
+                context.Call(new FoodForm(), this.ResumeAfterOptionDialog);
+            }
+
             else if (message.Text.ToLower().Contains("help") || message.Text.ToLower().Contains("support") || message.Text.ToLower().Contains("problem"))
             {
-                await context.PostAsync($"You ask for a help: [Bing](http://bing.com)");
+                await context.PostAsync($"You asked for help: [Bing](http://bing.com)");
             }
-            else if (message.Text.ToLower().Contains("GetFoodPlaces") || message.Text.ToLower().Contains("Food") || message.Text.ToLower().Contains("hotal"))
-            {
-
-
-                await context.PostAsync($"good food places: [Bing](http://bing.com)");
-            }
+            
 
             else
             {
                 await context.PostAsync("I'm sorry. I didn't understand you.");
             }
 
+         //   context.Wait(this.MessageReceivedAsync);
+        }
+
+       
+
+        private async Task ResumeAfterOptionDialog(IDialogContext context, IAwaitable<object> result)
+        {
+            await context.PostAsync($"Thanks for using Talk2me.");
             context.Wait(this.MessageReceivedAsync);
         }
+
 
     }
 }
